@@ -92,11 +92,14 @@ def graficar_entrenamiento(run_id: str, run_dir: Path) -> None:
 
     fig, eje = plt.subplots(figsize=(7, 4.5))
     if monitor is not None and len(monitor) > 0:
-        eje.scatter(monitor["t"] if "t" in monitor else range(len(monitor)), monitor["r"], s=4, alpha=0.25, color="gray", label="Episodios (recompensa cruda)")
+        # Eje x en PASOS de entrenamiento (no tiempo de reloj): suma acumulada de la
+        # duración de cada episodio, igual que stable_baselines3.common.results_plotter.
+        pasos_acumulados = monitor["l"].cumsum()
+        eje.scatter(pasos_acumulados, monitor["r"], s=4, alpha=0.25, color="gray", label="Episodios (recompensa cruda)")
     if "rollout/ep_rew_mean" in escalares:
         pasos, valores = escalares["rollout/ep_rew_mean"]
         eje.plot(pasos, valores, color=COLORES.get(run_id, "#2980b9"), linewidth=2, label="Media móvil (100 ep., TensorBoard)")
-    eje.set_xlabel("Paso de entrenamiento (o tiempo, según eje disponible)")
+    eje.set_xlabel("Paso de entrenamiento")
     eje.set_ylabel("Recompensa por episodio (recortada en entrenamiento)")
     eje.set_title(f"Entrenamiento: {ETIQUETAS.get(run_id, run_id)}")
     eje.legend()

@@ -1,0 +1,2 @@
+id,algoritmo,entorno,n_envs,pasos,duracion_min
+iter1_dqn,dqn,final,1,424833,85.1
