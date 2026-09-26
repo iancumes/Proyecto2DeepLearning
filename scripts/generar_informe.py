@@ -264,16 +264,23 @@ def cargar_registro_iteraciones() -> pd.DataFrame | None:
 
 
 def cargar_ultima_eval_npz(run_dir: Path) -> dict | None:
+    serie = cargar_serie_eval_npz(run_dir)
+    return serie[-1] if serie else None
+
+
+def cargar_serie_eval_npz(run_dir: Path) -> list[dict]:
     evals = cargar_evaluaciones(run_dir)
     if evals is None or len(evals["timesteps"]) == 0:
-        return None
-    resultados = evals["results"][-1]
-    return {
-        "pasos": int(evals["timesteps"][-1]),
-        "media": float(resultados.mean()),
-        "desviacion": float(resultados.std()),
-        "maximo": float(resultados.max()),
-    }
+        return []
+    salida = []
+    for pasos, resultados in zip(evals["timesteps"], evals["results"]):
+        salida.append({
+            "pasos": int(pasos),
+            "media": float(resultados.mean()),
+            "desviacion": float(resultados.std()),
+            "maximo": float(resultados.max()),
+        })
+    return salida
 
 
 def cargar_ep_rew_mean_final(run_dir: Path) -> float | None:
@@ -300,6 +307,7 @@ def recolectar_datos() -> dict:
         iteraciones[run_id] = {
             "final": cargar_json(run_dir / "final.json"),
             "eval_entrenamiento": cargar_ultima_eval_npz(run_dir),
+            "eval_serie": cargar_serie_eval_npz(run_dir),
             "ep_rew_mean_entrenamiento": cargar_ep_rew_mean_final(run_dir),
         }
     datos["iteraciones"] = iteraciones
@@ -563,27 +571,54 @@ def seccion_2_4(doc: Document, datos: dict) -> None:
     parrafo(doc, "2.4 Discusión de resultados", "Heading 1")
 
     v0 = datos["eval_iter0"]["recompensa_media"] if datos.get("eval_iter0") else None
-    v1 = valor_eval("iter1_dqn", datos)
-    v2 = valor_eval("iter2_ppo_v5_directo", datos)
     v3 = valor_eval("iter3_ppo_final", datos)
+    serie2 = datos["iteraciones"]["iter2_ppo_v5_directo"].get("eval_serie") or []
+    serie3 = datos["iteraciones"]["iter3_ppo_final"].get("eval_serie") or []
+    serie1 = datos["iteraciones"]["iter1_dqn"].get("eval_serie") or []
 
     parrafo(doc, "Comparación entre iteraciones", "Heading 2")
-    lista(doc, [
-        comparar("La iteración 3 (PPO, preprocesamiento final)", v3, "la línea base aleatoria (iteración 0)", v0, "efecto de entrenar en absoluto"),
-        comparar("La iteración 3 (max-pool + señal de vida)", v3, "la iteración 2 (v5 directo, sin max-pool ni vida)", v2, "efecto del preprocesamiento, mismo algoritmo PPO"),
-        comparar("La iteración 3 (PPO)", v3, "la iteración 1 (DQN)", v1, "efecto del algoritmo, mismo preprocesamiento"),
-    ])
     fragmentos(doc, [
-        ("El cambio con mayor impacto esperado es el del ", False, False), ("preprocesamiento", True, False),
-        (" (iteración 2 vs. 3): sin max-pooling la red puede recibir una fracción de frames sin el proyectil visible (sección 2.1), y sin la señal de fin de vida el crédito por perder una vida se difumina a lo largo de todo el episodio de 3 vidas en vez de asignarse de inmediato, lo que en la práctica ralentiza el aprendizaje incluso si la puntuación final no llegara a ser drásticamente distinta en el número de pasos disponible hoy. El cambio de ", False, False),
-        ("algoritmo", True, False),
-        (" (DQN vs. PPO, iteración 1 vs. 3) aísla el efecto de recolectar experiencia de 8 entornos en paralelo frente a un único entorno con buffer de repetición pequeño (10 000 transiciones, reducido deliberadamente por la memoria disponible); un buffer tan chico limita cuánta experiencia pasada puede reutilizar DQN, una desventaja que PPO no tiene por ser on-policy.", False, False),
+        (comparar("La iteración 3 (PPO, preprocesamiento final, evaluación oficial)", v3, "la línea base aleatoria (iteración 0)", v0, "efecto de entrenar en absoluto") + " ", False, False),
+        ("Esta es la comparación más limpia de las tres: ambas se miden con el mismo protocolo (5 episodios completos, política fija, recompensa cruda) y la diferencia solo puede atribuirse a haber entrenado.", False, False),
+    ])
+
+    fragmentos(doc, [
+        ("Efecto del preprocesamiento (iteración 2 vs. 3). ", True, False),
+        ("Esta comparación tiene un matiz importante: por el reordenamiento de los lanzamientos para no saturar la RAM (sección 8 del plan de trabajo), la iteración 2 solo llegó a entrenar ", False, False),
+        (f"{(datos['iteraciones']['iter2_ppo_v5_directo'].get('final') or {}).get('pasos_alcanzados', 0):,}".replace(",", " "), False, True),
+        (" pasos, mientras que la iteración 3 llegó a ", False, False),
+        (f"{(datos['iteraciones']['iter3_ppo_final'].get('final') or {}).get('pasos_alcanzados', 0):,}".replace(",", " "), False, True),
+        (". En el único punto de evaluación comparable (", False, False),
+    ])
+    if serie2 and any(p["pasos"] == serie2[0]["pasos"] for p in serie3):
+        p2 = serie2[0]
+        p3_igual = next(p for p in serie3 if p["pasos"] == p2["pasos"])
+        fragmentos(doc, [
+            (f"{p2['pasos']:,} pasos".replace(",", " "), False, True),
+            ("), la iteración 2 obtuvo una evaluación greedy de ", False, False),
+            (formato_recompensa(p2["media"], p2["desviacion"], p2["maximo"]), True, False),
+            (" frente a ", False, False),
+            (formato_recompensa(p3_igual["media"], p3_igual["desviacion"], p3_igual["maximo"]), True, False),
+            (" de la iteración 3, es decir, en igualdad de pasos el preprocesamiento simplificado no fue peor en este entrenamiento puntual. Sin embargo, la iteración 3 continuó entrenando y mejorando claramente más allá de ese punto (ver Figura de evaluación comparada), mientras que la iteración 2 se detuvo ahí por el presupuesto de tiempo. Con los datos de esta sesión no se puede aislar limpiamente el efecto del preprocesamiento del efecto de la cantidad de pasos: sería necesario entrenar ambas variantes exactamente el mismo número de pasos para una conclusión firme sobre el max-pooling y la señal de vida en aislamiento. La curva de entrenamiento (recompensa recortada) tampoco es comparable directamente entre ambas: la iteración 3 usa fin-de-vida-como-fin-de-episodio, por lo que sus episodios de entrenamiento son más cortos (una vida) que los de la iteración 2 (tres vidas), lo que reduce mecánicamente su recompensa media por episodio aunque la política por decisión sea igual de buena.", False, False),
+        ])
+    else:
+        parrafo(doc, "No hay un punto de evaluación con el mismo número de pasos entre ambas iteraciones para compararlas directamente; ver las curvas de evaluación por separado.")
+
+    v1_txt = formato_recompensa(serie1[-1]["media"], serie1[-1]["desviacion"], serie1[-1]["maximo"]) if serie1 else "N/D"
+    pasos_iter1_txt = f"{(datos['iteraciones']['iter1_dqn'].get('final') or {}).get('pasos_alcanzados', 0):,}".replace(",", " ")
+    fragmentos(doc, [
+        ("Efecto del algoritmo (DQN vs. PPO, iteración 1 vs. 3). ", True, False),
+        (f"Con el mismo preprocesamiento final, DQN alcanzó una evaluación greedy de {v1_txt} tras {pasos_iter1_txt} pasos", False, False),
+        (f", frente a {formato_recompensa(v3)} de PPO tras muchos más pasos. Tampoco aquí el número de pasos es igual entre ambas —DQN es más lento por decisión al hacer una actualización de gradiente cada 4 pasos con un solo entorno—, por lo que la comparación de algoritmo también está confundida con la cantidad de cómputo recibido; aun así, es consistente con la justificación práctica de la sección 2.2 (PPO aprovecha mejor el tiempo de reloj disponible en esta máquina al paralelizar la recolección de experiencia en 8 entornos).", False, False),
     ])
 
     parrafo(doc, "Análisis cualitativo del agente final (video)", "Heading 2")
     fragmentos(doc, [
-        ("[Completar tras inspeccionar entregables/space_invaders_ppo_final.mp4] ", True, False),
-        ("A partir de los fotogramas del episodio grabado con la política greedy final se describen aquí las estrategias observadas (por ejemplo, si el agente se desplaza sistemáticamente hacia una columna de invasores antes de disparar, si prioriza a la nave nodriza, o si permanece estático) y las situaciones donde falla o se queda atascado (por ejemplo, cerca de los bordes de la pantalla o cuando los invasores aceleran al quedar pocos).", False, False),
+        ("Se inspeccionaron fotogramas del episodio entregado (semilla 23239, 810 puntos, 966 decisiones; ", False, False),
+        ("entregables/space_invaders_ppo_final.mp4", False, True),
+        ("). El agente muestra una estrategia de ", False, False),
+        ("barrido sistemático", True, False),
+        (": dispara de forma continua mientras se desplaza lateralmente, reduciendo la formación completa de invasores de forma pareja en vez de concentrarse en una sola columna. Los tres refugios permanecen visibles y solo parcialmente erosionados durante la mayor parte del episodio, lo que sugiere que el agente no se posiciona detrás de ellos deliberadamente pero tampoco atrae fuego innecesario hacia esa zona. En la fase final, cuando solo queda un invasor en pantalla, el agente se desplaza activamente hasta el borde derecho para alinearse con él y dispararle —una conducta de \"persecución del último objetivo\" en vez de esperar pasivamente a que descienda—, visible en la progresión de los fotogramas capturados. La causa más probable del fin del episodio, dado que 810 puntos exceden el valor de una sola formación completa, es haber agotado las tres vidas a lo largo de más de una oleada, no haber despejado la pantalla por completo.", False, False),
     ])
 
     parrafo(doc, "Limitaciones del enfoque y del cómputo disponible", "Heading 2")
@@ -592,6 +627,8 @@ def seccion_2_4(doc: Document, datos: dict) -> None:
         "Buffer de repetición de DQN reducido a 10 000 transiciones (frente a 100 000-1 000 000 típico) para que cupiera en la memoria disponible, lo que limita la diversidad de experiencia que DQN puede reutilizar.",
         "No se realizó una búsqueda sistemática de hiperparámetros (grid/random search): se usaron valores estándar de la literatura (rl-zoo, Mnih et al.) sin ajuste fino específico para este equipo o este presupuesto de tiempo.",
         "La iteración 2 usa una arquitectura de preprocesamiento deliberadamente empobrecida (control experimental), por lo que su puntaje no debe interpretarse como el límite superior de PPO en este entorno.",
+        "Las tres iteraciones no recibieron el mismo número de pasos de entrenamiento: por restricciones de memoria (sección 8 del plan de trabajo) se lanzaron de forma parcialmente secuencial en vez de simultánea, y una interrupción del equipo durante el entrenamiento (suspensión por inactividad) extendió el tiempo de reloj real más allá de lo planeado. Esto favorece en más pasos a la iteración 3 frente a la 1 y la 2, y limita cuánto puede atribuirse una diferencia de puntaje al algoritmo o al preprocesamiento en vez de al presupuesto de cómputo recibido (ver sección 2.4).",
+        "El protocolo oficial de evaluación usa solo 5 episodios (mandato del enunciado, igual para toda la clase): con acciones pegajosas activas, esa es una muestra pequeña y el puntaje medio/máximo reportado puede variar de forma no despreciable según la semilla; de hecho, evaluaciones internas del propio entrenamiento con otras semillas llegaron a puntajes medios superiores (hasta ~670) a los de la evaluación oficial final (583).",
     ])
 
     parrafo(doc, "Reflexión sobre exploración vs. explotación", "Heading 2")

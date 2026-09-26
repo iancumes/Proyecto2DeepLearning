@@ -1,0 +1,62 @@
+{
+  "modelo": "C:\\Users\\ianro\\OneDrive\\Documentos\\Uvg\\Octavo Semestre\\Deep Learning\\Proyecto2DeepLearning\\resultados\\iter3_ppo_final\\eval\\best_model.zip",
+  "episodios": 5,
+  "seed_inicial": 23236,
+  "puntajes": [
+    590.0,
+    545.0,
+    440.0,
+    665.0,
+    425.0
+  ],
+  "recompensa_media": 533.0,
+  "recompensa_desviacion": 90.69729874698585,
+  "recompensa_maxima": 665.0,
+  "resultados_detallados": [
+    {
+      "pasos": 714,
+      "recompensa_total": 590.0,
+      "terminated": true,
+      "truncated": false,
+      "limite_alcanzado": false,
+      "semilla": 23236,
+      "duracion_segundos": 1.1
+    },
+    {
+      "pasos": 887,
+      "recompensa_total": 545.0,
+      "terminated": true,
+      "truncated": false,
+      "limite_alcanzado": false,
+      "semilla": 23237,
+      "duracion_segundos": 1.3
+    },
+    {
+      "pasos": 796,
+      "recompensa_total": 440.0,
+      "terminated": true,
+      "truncated": false,
+      "limite_alcanzado": false,
+      "semilla": 23238,
+      "duracion_segundos": 1.2
+    },
+    {
+      "pasos": 987,
+      "recompensa_total": 665.0,
+      "terminated": true,
+      "truncated": false,
+      "limite_alcanzado": false,
+      "semilla": 23239,
+      "duracion_segundos": 1.5
+    },
+    {
+      "pasos": 956,
+      "recompensa_total": 425.0,
+      "terminated": true,
+      "truncated": false,
+      "limite_alcanzado": false,
+      "semilla": 23240,
+      "duracion_segundos": 1.4
+    }
+  ]
+}

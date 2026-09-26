@@ -1,2 +1,4 @@
 id,algoritmo,entorno,n_envs,pasos,duracion_min
 iter1_dqn,dqn,final,1,424833,85.1
+iter2_ppo_v5_directo,ppo,simple,8,470024,124.5
+iter3_ppo_final,ppo,final,8,2352232,210.5

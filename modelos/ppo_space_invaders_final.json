@@ -1,0 +1,48 @@
+{
+  "id": "iter3_ppo_final",
+  "algoritmo": "ppo",
+  "entorno": {
+    "nombre": "final",
+    "env_id": "ALE/SpaceInvaders-v5",
+    "make_kwargs": {
+      "repeat_action_probability": 0.25,
+      "full_action_space": false,
+      "frameskip": 1
+    },
+    "preprocesamiento": {
+      "tipo": "atari_preprocessing",
+      "frame_skip": 4,
+      "noop_max": 30,
+      "screen_size": 84,
+      "grayscale_obs": true,
+      "scale_obs": false,
+      "n_stack": 4
+    },
+    "entrenamiento": {
+      "clip_reward": true,
+      "episodic_life": true
+    }
+  },
+  "hiperparametros": {
+    "n_steps": 128,
+    "n_epochs": 4,
+    "batch_size": 256,
+    "gamma": 0.99,
+    "gae_lambda": 0.95,
+    "vf_coef": 0.5,
+    "ent_coef": 0.01,
+    "max_grad_norm": 0.5,
+    "learning_rate_inicial": 0.00025,
+    "clip_range_inicial": 0.1
+  },
+  "n_envs": 8,
+  "pasos_alcanzados": 2352232,
+  "duracion_segundos": 12627.044308185577,
+  "seed": 23236,
+  "versiones": {
+    "python": "3.13.2",
+    "stable_baselines3": "2.9.0",
+    "torch": "2.14.0+cpu",
+    "gymnasium": "1.3.0"
+  }
+}
