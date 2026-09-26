@@ -1,0 +1,20 @@
+{
+  "id": "iter3_ppo_final",
+  "descripcion": "PPO con la pila de preprocesamiento final (max-pool + vida + clip), 8 entornos. Modelo entregado.",
+  "algoritmo": "ppo",
+  "entorno": "final",
+  "n_envs": 8,
+  "policy": "CnnPolicy",
+  "hiperparametros": {
+    "n_steps": 128,
+    "n_epochs": 4,
+    "batch_size": 256,
+    "gamma": 0.99,
+    "gae_lambda": 0.95,
+    "vf_coef": 0.5,
+    "ent_coef": 0.01,
+    "max_grad_norm": 0.5,
+    "learning_rate_inicial": 2.5e-4,
+    "clip_range_inicial": 0.1
+  }
+}

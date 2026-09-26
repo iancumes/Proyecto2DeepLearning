@@ -1,0 +1,22 @@
+{
+  "id": "iter1_dqn",
+  "descripcion": "DQN con la pila de preprocesamiento final (max-pool + vida + clip), 1 entorno.",
+  "algoritmo": "dqn",
+  "entorno": "final",
+  "n_envs": 1,
+  "policy": "CnnPolicy",
+  "hiperparametros": {
+    "learning_rate": 1e-4,
+    "buffer_size": 10000,
+    "learning_starts": 10000,
+    "batch_size": 32,
+    "gamma": 0.99,
+    "train_freq": 4,
+    "gradient_steps": 1,
+    "target_update_interval": 1000,
+    "exploration_fraction": 0.1,
+    "exploration_initial_eps": 1.0,
+    "exploration_final_eps": 0.01,
+    "max_grad_norm": 10
+  }
+}

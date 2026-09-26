@@ -1,0 +1,57 @@
+{
+  "modelo": "agente_aleatorio (Iter 0, sin entrenamiento)",
+  "episodios": 5,
+  "seed_inicial": 23236,
+  "puntajes": [
+    80.0,
+    135.0,
+    135.0,
+    195.0,
+    20.0
+  ],
+  "recompensa_media": 113.0,
+  "recompensa_desviacion": 59.04235767650204,
+  "recompensa_maxima": 195.0,
+  "resultados_detallados": [
+    {
+      "pasos": 353,
+      "recompensa_total": 80.0,
+      "terminated": true,
+      "truncated": false,
+      "limite_alcanzado": false,
+      "semilla": 23236
+    },
+    {
+      "pasos": 473,
+      "recompensa_total": 135.0,
+      "terminated": true,
+      "truncated": false,
+      "limite_alcanzado": false,
+      "semilla": 23237
+    },
+    {
+      "pasos": 402,
+      "recompensa_total": 135.0,
+      "terminated": true,
+      "truncated": false,
+      "limite_alcanzado": false,
+      "semilla": 23238
+    },
+    {
+      "pasos": 521,
+      "recompensa_total": 195.0,
+      "terminated": true,
+      "truncated": false,
+      "limite_alcanzado": false,
+      "semilla": 23239
+    },
+    {
+      "pasos": 471,
+      "recompensa_total": 20.0,
+      "terminated": true,
+      "truncated": false,
+      "limite_alcanzado": false,
+      "semilla": 23240
+    }
+  ]
+}

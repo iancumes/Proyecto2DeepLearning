@@ -1,0 +1,22 @@
+.venv/
+__pycache__/
+.pytest_cache/
+.ipynb_checkpoints/
+*.py[cod]
+*.egg-info/
+tmp/
+.env
+.env.*
+
+# Artefactos de entrenamiento pesados: solo se versiona el modelo final
+resultados/*/checkpoints/
+resultados/*/tb/
+resultados/*/monitor/
+resultados/*/eval/
+
+# Videos intermedios de evaluación (solo el elegido va en entregables/)
+resultados/*/videos/
+resultados_iter1.log
+resultados_iter3.log
+tmp_pip_install.log
+tmp_*.png

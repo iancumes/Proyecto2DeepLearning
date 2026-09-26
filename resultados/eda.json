@@ -1,0 +1,90 @@
+{
+  "info_entorno": {
+    "env_id": "ALE/SpaceInvaders-v5",
+    "observation_space": "Box(0, 255, (210, 160, 3), uint8)",
+    "action_space": "Discrete(6)",
+    "n_acciones": 6,
+    "significado_acciones": [
+      "NOOP",
+      "FIRE",
+      "RIGHT",
+      "LEFT",
+      "RIGHTFIRE",
+      "LEFTFIRE"
+    ],
+    "vidas_iniciales": 3,
+    "spec_kwargs": {
+      "game": "space_invaders",
+      "repeat_action_probability": 0.25,
+      "full_action_space": false,
+      "frameskip": 1,
+      "max_num_frames_per_episode": 108000
+    },
+    "max_num_frames_per_episode": 108000
+  },
+  "episodios_aleatorios": {
+    "n_episodios": 30,
+    "puntaje_medio": 155.5,
+    "puntaje_desviacion": 133.3376040982688,
+    "puntaje_min": 30.0,
+    "puntaje_max": 650.0,
+    "pasos_medio": 2144.8,
+    "pasos_totales": 64344,
+    "pct_pasos_recompensa_cero": 99.6,
+    "valores_recompensa_no_cero_observados": [
+      5.0,
+      10.0,
+      15.0,
+      20.0,
+      25.0,
+      30.0,
+      200.0
+    ],
+    "distribucion_valores_recompensa": {
+      "0.0": 64066,
+      "5.0": 62,
+      "10.0": 55,
+      "15.0": 49,
+      "20.0": 44,
+      "25.0": 38,
+      "30.0": 28,
+      "200.0": 2
+    },
+    "puntajes_por_episodio": [
+      215.0,
+      105.0,
+      120.0,
+      45.0,
+      120.0,
+      210.0,
+      110.0,
+      125.0,
+      75.0,
+      135.0,
+      120.0,
+      545.0,
+      200.0,
+      155.0,
+      295.0,
+      125.0,
+      180.0,
+      80.0,
+      50.0,
+      30.0,
+      105.0,
+      80.0,
+      135.0,
+      105.0,
+      35.0,
+      180.0,
+      200.0,
+      650.0,
+      30.0,
+      105.0
+    ]
+  },
+  "flicker": {
+    "diff_t1": 13929.838198498748,
+    "diff_t2": 19094.178631051753
+  }
+}
